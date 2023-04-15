@@ -13,7 +13,7 @@ clock = pygame.time.Clock()
 running = True
 font = pygame.font.SysFont('comicsans', 30,'0xF9D949', True)
 
-# stage home, login, singin, roulete, slot, coinflip, account, about, deposite
+# stage home, login, singin, roulete, slot, coinflip, account, about, deposite, test
 stage = "login"
 
 class Button():
