@@ -28,15 +28,15 @@ class Button():
         
 
         self.fillColors = {
-            'normal' : '0x210062',
-            'hover' : '0xF9D949',
-            'pressed' : '0xF0F0F0',
+            'normal' : '0x1B262C',
+            'hover' : '0x00B7C2',
+            'pressed' : '0x00B7C2',
         }
 
         self.buttonSurface = pygame.Surface((self.width, self.height))
         self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-        self.buttonSurf = font.render(buttonText, True,"0xF9D949", (20, 20, 20))
+        self.buttonSurf = font.render(buttonText, True,"0xFDCB9E")
         
     def process(self):
         mousePos = pygame.mouse.get_pos()
@@ -58,7 +58,7 @@ class Button():
         self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
     ])
         screen.blit(self.buttonSurface, self.buttonRect)
-
+#https://www.geeksforgeeks.org/how-to-create-a-text-input-box-with-pygame/
 class TextField():
     def __init__(self, x, y, width, height, textholder="default"):
         self.x = x
@@ -70,9 +70,9 @@ class TextField():
         self.color_active = pygame.Color('lightskyblue3')
         self.color_passive = pygame.Color('chartreuse4')
         self.fillColors = {
-            'normal' : '0x210062',
-            'hover' : '0xF9D949',
-            'pressed' : '0xF0F0F0',
+            'normal' : '0x1B262C',
+            'hover' : '0x0F4C75',
+            'pressed' : '0x00B7C2',
         }
 
         self.textRect = pygame.Rect(self.x, self.y, self.width, self.height)
@@ -216,7 +216,7 @@ while running:
             running = False
 
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("purple")
+    screen.fill("0x0F4C75")
     page(stage)
     
     
