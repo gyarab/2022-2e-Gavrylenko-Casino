@@ -1,8 +1,12 @@
-# Example file showing a basic pygame "game loop"
+#zdroje:
+#https://www.geeksforgeeks.org/how-to-create-a-text-input-box-with-pygame/
+#
+#
+#
+#
 import pygame
-#from MyButton import Button
-
-
+import Database
+global stage
 pygame.init()
 pygame.font.init()
 WIDTH = 1280
@@ -58,15 +62,19 @@ class Button():
         self.buttonRect.height/2 - self.buttonSurf.get_rect().height/2
     ])
         screen.blit(self.buttonSurface, self.buttonRect)
-#https://www.geeksforgeeks.org/how-to-create-a-text-input-box-with-pygame/
+
 class TextField():
-    def __init__(self, x, y, width, height, textholder="default"):
+    def __init__(self, x, y, width, height, textholder="default",isPassword=False,function =None):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.base_font = pygame.font.Font(None, 32)
         self.user_text = textholder
+        self.textholder = textholder
+        self.isPassword = isPassword
+        self.function = function
+        self.max_length = 12
         self.color_active = pygame.Color('lightskyblue3')
         self.color_passive = pygame.Color('chartreuse4')
         self.fillColors = {
@@ -77,78 +85,64 @@ class TextField():
 
         self.textRect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.active = False
+        self.isSelected = False
         
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.textRect.collidepoint(event.pos):
-                    self.active = True
-                else:
-                    self.active = False
-    
-            if event.type == pygame.KEYDOWN:
-    
-                # Check for backspace
-                if event.key == pygame.K_BACKSPACE:
-    
-                    # get text input from 0 to -1 i.e. end.
-                    user_text = user_text[:-1]
-    
-                # Unicode standard is used for string
-                # formation
-                else:
-                    user_text += event.unicode
+        
     def draw(self):
-        text_surface = self.base_font.render(self.user_text, True, (255, 255, 255))
-        screen.blit(text_surface, (self.textRect.x+5, self.textRect.y+5))  
-        self.textRect.w = max(100, text_surface.get_width()+10)      
+        if self.isPassword and self.user_text!=self.textholder:
+            string = ""
+            for a in self.user_text:
+                string+="*"
+            text_surface = self.base_font.render(string, True, (255, 255, 255))
+        else:
+            text_surface = self.base_font.render(self.user_text, True, (255, 255, 255))
+        pygame.draw.rect(screen, "0x00B7C2" , self.textRect)
+        screen.blit(text_surface, (self.textRect.x+5, self.textRect.y+5)) 
+        self.textRect.w = max(100, text_surface.get_width()+10)    
 
-def myFunction():
-    pygame.init()
-    screen2 = pygame.display.set_mode((1280, 720))
-    clock2 = pygame.time.Clock()
-    running2 = True
-    while running2:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running2 = False
-
-        # fill the screen with a color to wipe away anything from last frame
-        screen2.fill("0xFFFFFF")
-        # stage home, login, singin, roulete, slot, coinflip, account, about, deposite
-        
-
-        
-        # RENDER YOUR GAME HERE
-
-        # flip() the display to put your work on screen
-        pygame.display.flip()
-        clock2.tick(60)  # limits FPS to 60
-
-def sign_function():
+def set_signin_page():
+    global stage
     stage = "signin"
 
 def login_function():
-    None
+    if Database.authorize(log_user_name_txt.user_text,log_user_password_txt.user_text):
+        global stage
+        stage ="home"
 
-gey = Button(30, 30, 400, 100, 'Слава', myFunction)
+def sign_function():
+    Database.add_user(signin_user_name_txt.user_text, signin_user_password_txt.user_text)
+        
 
+#login variables
 login_page_btns = []
-singin_btn = Button(WIDTH/2 - 75, 550, 150, 60, 'Sign In', sign_function)
-login_btn = Button(WIDTH/2 - 125, 450, 250, 60, 'Login', login_function)
+log_signin_btn = Button(WIDTH/2 - 75, 550, 150, 60, 'Sign In', set_signin_page)
+log_login_btn = Button(WIDTH/2 - 125, 450, 250, 60, 'Login', login_function)
+login_page_btns.append(log_signin_btn)
+login_page_btns.append(log_login_btn)
 
 login_page_txt = []
-user_name_txt = TextField(WIDTH/2 - 75, 150, 150, 60, 'username')
-user_password_txt = TextField(WIDTH/2 - 75, 250, 150, 60, 'password')
-login_page_txt.append(user_name_txt)
-login_page_txt.append(user_password_txt)
-login_page_btns.append(singin_btn)
-login_page_btns.append(login_btn)
+log_user_name_txt = TextField(WIDTH/2 - 75, 150, 150, 60, 'username',False,None)
+log_user_password_txt = TextField(WIDTH/2 - 75, 250, 150, 60, 'password',True,login_function)
+login_page_txt.append(log_user_name_txt)
+login_page_txt.append(log_user_password_txt)
+
+#signin variables
+signin_page_btns = []
+signin_btn = Button(WIDTH/2 - 125, 450, 250, 60, 'Sign In', sign_function)
+signin_page_btns.append(signin_btn)
+
+signin_page_txt = []
+signin_user_name_txt = TextField(WIDTH/2 - 75, 150, 150, 60, 'username',False,None)
+signin_user_password_txt = TextField(WIDTH/2 - 75, 250, 150, 60, 'password',True,None)
+signin_user_sec_password_txt = TextField(WIDTH/2 - 75, 350, 150, 60, 'second password',True,sign_function)
+signin_page_txt.append(signin_user_name_txt)
+signin_page_txt.append(signin_user_password_txt)
+signin_page_txt.append(signin_user_sec_password_txt)
+
 
 def loginPage():
     #TODO username text field, password text field, button login, button singin
-    print("loginpage")
+    
     for btn in login_page_btns:
         btn.process()
     for txt in login_page_txt:
@@ -156,11 +150,14 @@ def loginPage():
 
 def homePage():
     #TODO username text field, password text field, button login, button singin
-    print("loginpage")
+    screen.fill("0xFFFFFF")
 
-def singinPage():
-    #TODO username text field, password text field, button login, button singin
-    print("loginpage")
+def signinPage():
+    #TODO username text field, password text field,second password text field,button singin
+    for btn in signin_page_btns:
+        btn.process()
+    for txt in signin_page_txt:
+        txt.draw()
 
 def rouletePage():
     #TODO username text field, password text field, button login, button singin
@@ -192,8 +189,8 @@ def page(current_state):
                 loginPage()
             case "home":
                 homePage()
-            case "singin":
-                singinPage()
+            case "signin":
+                signinPage()
             case "roulete":
                 rouletePage()
             case "slot":
@@ -207,14 +204,49 @@ def page(current_state):
             case "deposite":
                 depositePage()
 
+def text_field_events(event):
+    global stage
+    if (stage =="login"):
+        page_txt = login_page_txt
+    elif(stage == "signin"):
+        page_txt = signin_page_txt
+    else:
+        page_txt = []
+
+    for text in page_txt:
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if text.textRect.collidepoint(event.pos):
+                text.active = True
+                text.isSelected = True
+                if(text.user_text ==text.textholder):
+                    text.user_text = ''
+            else:
+                if(text.user_text == ''):
+                    text.user_text = text.textholder
+                text.isSelected = False
+                text.active = False
+
+        if event.type == pygame.KEYDOWN and text.isSelected:
+            
+            if event.key == pygame.K_RETURN:
+                
+                login_function()
+            # Check for backspace
+            if event.key == pygame.K_BACKSPACE:
+                text.user_text = text.user_text[:-1]
+            elif(len(text.user_text)<text.max_length):
+                text.user_text += event.unicode
 
 while running:
+    
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
+        text_field_events(event)
+        
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("0x0F4C75")
     page(stage)
