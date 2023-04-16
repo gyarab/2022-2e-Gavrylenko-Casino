@@ -39,6 +39,9 @@ def add_user(name,password,sec_password):
     if password != sec_password:
         showError("Passwords do not match")
         return False
+    if (len(password) < 5):
+        showError("Your password must be between 5 and 12 characters")
+        return False
     try:
         with open('users.json') as json_file:
             data = json.load(json_file)
