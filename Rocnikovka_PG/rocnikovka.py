@@ -1,12 +1,18 @@
 #zdroje:
 #https://www.geeksforgeeks.org/how-to-create-a-text-input-box-with-pygame/
-#
+#https://www.geeksforgeeks.org/reading-and-writing-json-to-a-file-in-python/
 #
 #
 #
 import pygame
 import Database
 global stage
+global money
+global name 
+global roulete_wins
+global coin_wins
+global slot_wins
+
 pygame.init()
 pygame.font.init()
 WIDTH = 1280
@@ -19,6 +25,11 @@ font = pygame.font.SysFont('comicsans', 30,'0xF9D949', True)
 
 # stage home, login, singin, roulete, slot, coinflip, account, about, deposite, test
 stage = "login"
+money = 0
+name = "abobus"
+roulete_wins = 0
+coin_wins = 0
+slot_wins = 0
 
 class Button():
     def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False):
@@ -29,7 +40,7 @@ class Button():
         self.onclickFunction = onclickFunction
         self.onePress = onePress
         self.alreadyPressed = False
-        
+        self.buttonText = buttonText
 
         self.fillColors = {
             'normal' : '0x1B262C',
@@ -40,7 +51,7 @@ class Button():
         self.buttonSurface = pygame.Surface((self.width, self.height))
         self.buttonRect = pygame.Rect(self.x, self.y, self.width, self.height)
 
-        self.buttonSurf = font.render(buttonText, True,"0xFDCB9E")
+        self.buttonSurf = font.render(str(self.buttonText), True,"0xFDCB9E")
         
     def process(self):
         mousePos = pygame.mouse.get_pos()
@@ -107,11 +118,34 @@ def set_signin_page():
 def login_function():
     if Database.authorize(log_user_name_txt.user_text,log_user_password_txt.user_text):
         global stage
+        load_data()
         stage ="home"
 
 def sign_function():
-    Database.add_user(signin_user_name_txt.user_text, signin_user_password_txt.user_text)
+    global stage
+    if Database.add_user(signin_user_name_txt.user_text, signin_user_password_txt.user_text,signin_user_sec_password_txt.user_text):
         
+        print("dobavil")
+        stage ="login"
+    else:
+        print("false")
+
+def load_data():
+    global money, name, roulete_wins, coin_wins, slot_wins
+
+    data = Database.load_data(log_user_name_txt.user_text)
+    name = data[0]
+    money = data[1]
+    roulete_wins = data[2]
+    coin_wins = data[3]
+    slot_wins = data[4]
+    
+    nav_bar_account_btn = Button(1000, 0, 280, 60,f"{name}"+" "+f"{money}"+"$", set_stage("account"), False)
+    nav_bar_btns.append(nav_bar_account_btn)
+
+def set_stage(stg):
+    global stage
+    stage = stg
 
 #login variables
 login_page_btns = []
@@ -128,7 +162,7 @@ login_page_txt.append(log_user_password_txt)
 
 #signin variables
 signin_page_btns = []
-signin_btn = Button(WIDTH/2 - 125, 450, 250, 60, 'Sign In', sign_function)
+signin_btn = Button(WIDTH/2 - 125, 500, 250, 60, 'Sign In', sign_function)
 signin_page_btns.append(signin_btn)
 
 signin_page_txt = []
@@ -140,9 +174,22 @@ signin_page_txt.append(signin_user_password_txt)
 signin_page_txt.append(signin_user_sec_password_txt)
 
 
+#navigation_bar variables
+nav_bar_btns = []
+nav_bar_home_btn = Button(0, 0, 180, 60, "Home", set_stage("home"), False)
+nav_bar_roulette_btn = Button(180, 0, 180, 60, "Roulette", set_stage("roulette"), False)
+nav_bar_slot_btn = Button(360, 0, 180, 60, "Slot", set_stage("slot"), False)
+nav_bar_coin_btn = Button(540, 0, 180, 60, "CoinFlip", set_stage("coinflip"), False)
+
+
+    
+nav_bar_btns.append(nav_bar_home_btn)
+nav_bar_btns.append(nav_bar_roulette_btn)
+nav_bar_btns.append(nav_bar_slot_btn)
+nav_bar_btns.append(nav_bar_coin_btn)
+
 def loginPage():
     #TODO username text field, password text field, button login, button singin
-    
     for btn in login_page_btns:
         btn.process()
     for txt in login_page_txt:
@@ -150,7 +197,9 @@ def loginPage():
 
 def homePage():
     #TODO username text field, password text field, button login, button singin
-    screen.fill("0xFFFFFF")
+    screen.fill("0x0F4C75")
+    nav_bar()
+    
 
 def signinPage():
     #TODO username text field, password text field,second password text field,button singin
@@ -159,21 +208,25 @@ def signinPage():
     for txt in signin_page_txt:
         txt.draw()
 
-def rouletePage():
+def nav_bar():
+    for btn in nav_bar_btns:
+        btn.process()
+
+def roulettePage():
     #TODO username text field, password text field, button login, button singin
-    print("loginpage")
+    print("roulette")
 
 def slotPage():
     #TODO username text field, password text field, button login, button singin
-    print("loginpage")
+    print("slott")
 
 def coinflipPage():
     #TODO username text field, password text field, button login, button singin
-    print("loginpage")
+    print("coin")
 
 def accountPage():
     #TODO username text field, password text field, button login, button singin
-    print("loginpage")
+    print("acc")
 
 def aboutPage():
     #TODO username text field, password text field, button login, button singin
@@ -191,8 +244,8 @@ def page(current_state):
                 homePage()
             case "signin":
                 signinPage()
-            case "roulete":
-                rouletePage()
+            case "roulette":
+                roulettePage()
             case "slot":
                 slotPage()
             case "coinflip":
@@ -231,12 +284,15 @@ def text_field_events(event):
             
             if event.key == pygame.K_RETURN:
                 
-                login_function()
+                if(stage == "login"):
+                    login_function()
             # Check for backspace
             if event.key == pygame.K_BACKSPACE:
                 text.user_text = text.user_text[:-1]
             elif(len(text.user_text)<text.max_length):
                 text.user_text += event.unicode
+
+stage = "login"
 
 while running:
     
