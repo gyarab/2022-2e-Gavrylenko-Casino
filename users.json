@@ -12,34 +12,7 @@
         "id": 2,
         "name": "Egor",
         "password": "123",
-        "money": 1000,
-        "roulete_wins": 0,
-        "coin_wins": 0,
-        "slot_wins": 0
-    },
-    {
-        "id": 3,
-        "name": "govno",
-        "password": "123",
-        "money": 1000,
-        "roulete_wins": 0,
-        "coin_wins": 0,
-        "slot_wins": 0
-    },
-    {
-        "id": 4,
-        "name": "Mamunt",
-        "password": "111",
-        "money": 1000,
-        "roulete_wins": 0,
-        "coin_wins": 0,
-        "slot_wins": 0
-    },
-    {
-        "id": 5,
-        "name": "masha",
-        "password": "12345",
-        "money": 1000,
+        "money": 546565,
         "roulete_wins": 0,
         "coin_wins": 0,
         "slot_wins": 0
