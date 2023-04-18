@@ -7,7 +7,8 @@
 
 import pygame
 import Database
-from Classes import GameCard, Button, TextField, colors
+from Classes import GameCard, Button, TextField, colors, Roulette
+
 
 global stage
 global money
@@ -15,6 +16,7 @@ global name
 global roulete_wins
 global coin_wins
 global slot_wins
+global roulette
 
 pygame.init()
 pygame.font.init()
@@ -27,6 +29,7 @@ running = True
 
 # stage home, login, singin, roulete, slot, coinflip, account, about, deposite, test
 stage = "login"
+roulette = None
 money = 0
 name = "abobus"
 roulete_wins = 0
@@ -40,9 +43,12 @@ def update_btns(btns):
 
 
 def set_stage_roulette():
-    global stage
+    global stage, roulette
     stage = "Roulette"
     update_btns(nav_bar_btns)
+    roulette = Roulette(screen)
+
+    
 def set_stage_home():
     global stage
     stage = "Home"
@@ -105,8 +111,8 @@ login_page_btns.append(log_signin_btn)
 login_page_btns.append(log_login_btn)
 
 login_page_txt = []
-log_user_name_txt = TextField(WIDTH/2-150, 150, 150, 60, 'username',False,None, screen)
-log_user_password_txt = TextField(WIDTH/2 -150, 250, 150, 60, 'password',True,login_function, screen)
+log_user_name_txt = TextField(WIDTH/2-150, 150, 300, 60, 'username',False,None, screen)
+log_user_password_txt = TextField(WIDTH/2 -150, 250, 300, 60, 'password',True,login_function, screen)
 login_page_txt.append(log_user_name_txt)
 login_page_txt.append(log_user_password_txt)
 
@@ -174,9 +180,12 @@ def signinPage():
         txt.draw()
 
 def roulettePage():
-    #TODO username text field, password text field, button login, button singin
-    
+    #TODO username text field, password text field, button login, button singin                        
+    global roulette
     nav_bar()
+    roulette.draw()
+    
+
 
 def slotPage():
     #TODO username text field, password text field, button login, button singin
@@ -220,18 +229,21 @@ def page(current_state):
                 depositePage()
 
 def text_field_events(event):
-    global stage
+    global stage, roulette
     if (stage =="login"):
         page_txt = login_page_txt
     elif(stage == "signin"):
         page_txt = signin_page_txt
+    elif(stage == "Roulette"):
+        page_txt = roulette.bet_txt
+        roulette.bet_txt[0].draw()
     else:
         page_txt = []
 
     for text in page_txt:
         
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if text.textRect.collidepoint(event.pos):
+            if text.textRect.collidepoint(event.pos) and text.static == False :
                 text.active = True
                 text.isSelected = True
                 if(text.user_text ==text.textholder):

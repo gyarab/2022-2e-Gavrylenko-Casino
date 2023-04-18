@@ -1,4 +1,5 @@
 import pygame
+
 colors = {
     'background': '0x0F4C75',
     'buttons': '0x1B262C',
@@ -64,7 +65,7 @@ class Button():
             else:
                 self.alreadyPressed = False
 
-        if self.buttonText == self.stage or self.hidd_text == self.stage:
+        if self.buttonText == self.stage or self.hidd_text == self.stage and self.stage != None:
             self.buttonSurface.fill(self.fillColors['pressed'])
         
 
@@ -75,7 +76,7 @@ class Button():
         self.screen.blit(self.buttonSurface, self.buttonRect)
 
 class TextField():
-    def __init__(self, x, y, width, height, textholder="default",isPassword=False,function =None, screen = None):
+    def __init__(self, x, y, width, height, textholder="default",isPassword=False,function =None, screen = None, static = False, alt_color = None):
         self.x = x
         self.y = y
         self.width = width
@@ -89,7 +90,26 @@ class TextField():
         self.color_active = colors["btn_hover"]
         self.color_passive = colors["buttons"]
         self.color = colors["buttons"]
+        self.alt_color = alt_color
+
+        if alt_color == "green":
+            self.color = "0x4f772d"
+            self.color_passive = "0x4f772d"
+        
+        if alt_color == "black":
+            self.color = "0x000000"
+            self.color_passive = "0x000000"
+        
+        if alt_color == "red":
+            self.color = "0x9d0208"
+            self.color_passive = "0x9d0208"
+        
+        if alt_color == "9":
+            self.max_length = 9
+        
         self.screen = screen
+        self.static = static
+        
 
         self.textRect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.active = False
@@ -97,19 +117,25 @@ class TextField():
         
         
     def draw(self):
+        
         if self.isPassword and self.user_text!=self.textholder:
             string = ""
             for a in self.user_text:
                 string+="*"
             text_surface = self.base_font.render(string, True, colors["text"])
         else:
-            text_surface = self.base_font.render(self.user_text, True, colors["text"])
+            if self.alt_color == "9" :
+                text_surface = self.base_font.render(self.user_text + " $", True, colors["text"])
+            else:
+                text_surface = self.base_font.render(self.user_text, True, colors["text"])
         pygame.draw.rect(self.screen, self.color , self.textRect)
-        self.screen.blit(text_surface, (self.textRect.x+self.textRect.w/2-text_surface.get_width()/2, self.textRect.y+30)) 
-        self.textRect.w = max(300, text_surface.get_width()+10)    
+        self.screen.blit(text_surface, (self.textRect.x+self.textRect.w/2-text_surface.get_width()/2, self.textRect.y + self.textRect.h/2-text_surface.get_height()/2)) 
+
+ 
 
 #img =  pygame.image.load('racecar.png')
 class GameCard():
+    
     def __init__(self, x, y, width, height, title="game",btn_function =None,game_img =None, screen = None):
         self.x = x
         self.y = y
@@ -129,3 +155,37 @@ class GameCard():
         self.screen.blit(text_surface, (self.textRect.x +self.width /2-text_surface.get_width()/2, self.textRect.y))
         
         self.btn.process()
+
+
+class Roulette():
+
+    def __init__(self, screen):
+        self.numbers = []
+        self.position = 0
+        self.title = "roulette"
+        self.screen = screen
+
+        self.bet_txt = []
+        self.text_black_bet = TextField(20,200,150,60, "Your bet..", False, None, screen,False, "9")
+        self.text_red_bet = TextField(20, 300, 150,60, "Your bet..", False, None, screen, False,"9")
+        self.text_green_bet = TextField(20,400,150,60,"Your bet..", False, None,screen, False, "9")
+        self.text_black = TextField(200, 200, 120,60, "Black", False, None, screen, True, "black")
+        self.text_red = TextField(200, 300, 120,60, "Red", False, None, screen, True, "red")
+        self.text_green = TextField(200, 400, 120,60, "Green", False, None, screen, True, "green")
+        self.bets = []
+
+        self.roulette_btns = []
+        self.submit_btn = Button(70, 500, 200, 60, "Submit", False, None, screen)
+        self.roulette_btns.append(self.submit_btn)
+        self.bet_txt.append(self.text_black_bet)
+        self.bet_txt.append(self.text_red_bet)
+        self.bet_txt.append(self.text_green_bet)
+        self.bet_txt.append(self.text_black)
+        self.bet_txt.append(self.text_red)
+        self.bet_txt.append(self.text_green)
+
+    def draw(self):
+        for txt in self.bet_txt:
+            txt.draw()
+        for btns in self.roulette_btns:
+            btns.process()
