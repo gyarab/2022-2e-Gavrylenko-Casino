@@ -2,17 +2,17 @@
 #https://www.geeksforgeeks.org/how-to-create-a-text-input-box-with-pygame/
 #https://www.geeksforgeeks.org/reading-and-writing-json-to-a-file-in-python/
 #https://www.freecodecamp.org/news/create-a-dictionary-in-python-python-dict-methods/
-#
+#https://www.pygame.org/docs/ref/draw.html#pygame.draw.circle
 #
 
-import pygame
+import pygame, math
 import Database
-from Classes import GameCard, Button, TextField, colors, Roulette
+from Classes import GameCard, Button, TextField, colors, Roulette, clock
 
 
 global stage
 global money
-global name 
+global name
 global roulete_wins
 global coin_wins
 global slot_wins
@@ -24,7 +24,7 @@ WIDTH = 1280
 HEIGHT = 720
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-clock = pygame.time.Clock()
+
 running = True
 
 # stage home, login, singin, roulete, slot, coinflip, account, about, deposite, test
@@ -102,6 +102,7 @@ def load_data():
     nav_bar_account_btn = Button(1000, 0, 280, 60,f"{name}"+" "+f"{money}"+"$", set_stage_account, False, screen, stage, "Account")
     nav_bar_btns.append(nav_bar_account_btn)
     
+
 
 #login variables
 login_page_btns = []
@@ -184,7 +185,7 @@ def roulettePage():
     global roulette
     nav_bar()
     roulette.draw()
-    
+    roulette.ball_animation()
 
 
 def slotPage():
@@ -227,6 +228,8 @@ def page(current_state):
                 aboutPage()
             case "Deposite":
                 depositePage()
+
+
 
 def text_field_events(event):
     global stage, roulette
@@ -282,6 +285,7 @@ while running:
     screen.fill(colors["background"])
     page(stage)
     pygame.display.flip()
+   
     clock.tick(60)  # limits FPS to 60
 
 pygame.quit()

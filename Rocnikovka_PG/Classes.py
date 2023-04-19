@@ -1,20 +1,4 @@
-import pygame
-
-colors = {
-    'background': '0x0F4C75',
-    'buttons': '0x1B262C',
-    'card_bg': '0x00B7C2',
-    'btn_hover': '0x00B7C2',
-    'text': '0xFDCB9E'
-}
-
-colors = {
-    'background': '0x112B3C',
-    'buttons': '0x205375',
-    'card_bg': '0xF66B0E',
-    'btn_hover': '0xF66B0E',
-    'text': '0xEFEFEF'
-}
+import pygame , math
 
 colors = {
     'background': '0x222222',
@@ -23,6 +7,7 @@ colors = {
     'btn_hover': '0x22A39F',
     'text': '0xF3EFE0'
 }
+clock = pygame.time.Clock()
 
 class Button():
     def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False, screen = None, stage = None, hidd_text = None):
@@ -131,7 +116,6 @@ class TextField():
         pygame.draw.rect(self.screen, self.color , self.textRect)
         self.screen.blit(text_surface, (self.textRect.x+self.textRect.w/2-text_surface.get_width()/2, self.textRect.y + self.textRect.h/2-text_surface.get_height()/2)) 
 
- 
 
 #img =  pygame.image.load('racecar.png')
 class GameCard():
@@ -151,10 +135,24 @@ class GameCard():
     def draw(self):
         
         text_surface = self.base_font.render(self.title, True, colors["text"])
-        pygame.draw.rect(self.screen, colors["btn_hover"] , self.textRect)
+        pygame.draw.rect(self.screen, colors["btn_hover"], self.textRect)
         self.screen.blit(text_surface, (self.textRect.x +self.width /2-text_surface.get_width()/2, self.textRect.y))
         
         self.btn.process()
+
+
+class RouletteBall():
+    def __init__(self, screen, x,y):
+        self.x = x
+        self.y = y
+        self.screen = screen
+        self.radius = 10
+    
+    def draw(self):
+        pygame.draw.circle( self.screen, colors["text"], (self.x, self.y), self.radius, self.radius)
+
+    #TODO do animations in rocnikovka.py
+    
 
 
 class Roulette():
@@ -164,7 +162,7 @@ class Roulette():
         self.position = 0
         self.title = "roulette"
         self.screen = screen
-
+        self.ball = RouletteBall(screen,825,336)
         self.bet_txt = []
         self.text_black_bet = TextField(20,200,150,60, "Your bet..", False, None, screen,False, "9")
         self.text_red_bet = TextField(20, 300, 150,60, "Your bet..", False, None, screen, False,"9")
@@ -175,7 +173,7 @@ class Roulette():
         self.bets = []
 
         self.roulette_btns = []
-        self.submit_btn = Button(70, 500, 200, 60, "Submit", False, None, screen)
+        self.submit_btn = Button(70, 500, 200, 60, "Submit", None, False , screen)
         self.roulette_btns.append(self.submit_btn)
         self.bet_txt.append(self.text_black_bet)
         self.bet_txt.append(self.text_red_bet)
@@ -184,8 +182,52 @@ class Roulette():
         self.bet_txt.append(self.text_red)
         self.bet_txt.append(self.text_green)
 
+
+    def draw_circle(self,x,y):
+    
+        pygame.draw.ellipse(self.screen, "0x000000", pygame.Rect(x,y,400,400), 200)
+
+        base_font = pygame.font.Font(None, 32)
+        center_x = x + 200
+        center_y = y + 200
+        r = 220
+        numbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]
+        angle = (360 * math.pi)/(37*180)
+        
+        for i in range(0, 37):
+            if i % 2 == 0:
+                pygame.draw.arc(self.screen, "0x9d0208", pygame.Rect(x, y, 400, 400), angle * i, angle * (i + 1), 150)
+            else :
+                pygame.draw.arc(self.screen, "0x000000", pygame.Rect(x, y, 400, 400), angle * i, angle * (i + 1), 150)
+            if i == 0:
+                pygame.draw.arc(self.screen, "0x4f772d", pygame.Rect(x, y, 400, 400), angle * i, angle * (i + 1), 150)
+
+            new_x = round(r * math.cos(angle * (i - 0.5) ) + center_x - 11)
+            new_y = round(r * math.sin(angle * (i - 0.5) ) + center_y - 11)
+
+            text_surface = base_font.render(str(numbers[i]), True, "0xF3EFE0")
+            self.screen.blit(text_surface, (new_x, new_y))
+    
+
     def draw(self):
         for txt in self.bet_txt:
             txt.draw()
         for btns in self.roulette_btns:
             btns.process()
+        self.draw_circle(450,150)
+        
+    def ball_animation(self):
+        center_x = 450 + 200
+        center_y = 150 + 200
+        r = 160
+        for i in range(0,360):
+            angle = math.pi/180
+            new_x = round(r * math.cos(angle * (i - 0.5) ) + center_x - 11)
+            new_y = round(r * math.sin(angle * (i - 0.5) ) + center_y - 11)
+            self.ball.x =new_x
+            self.ball.y =new_y
+            
+            self.draw()
+            self.ball.draw()
+            clock.tick(100)
+            pygame.display.flip()
