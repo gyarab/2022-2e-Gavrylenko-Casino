@@ -12,7 +12,16 @@
         "id": 2,
         "name": "Egor",
         "password": "123",
-        "money": 546565,
+        "money": 4800,
+        "roulete_wins": 0,
+        "coin_wins": 0,
+        "slot_wins": 0
+    },
+    {
+        "id": 3,
+        "name": "abobus",
+        "password": "123456",
+        "money": 0,
         "roulete_wins": 0,
         "coin_wins": 0,
         "slot_wins": 0

@@ -7,11 +7,10 @@
 
 import pygame, math
 import Database
-from Classes import GameCard, Button, TextField, colors, Roulette, clock
+from Classes import GameCard, Button, TextField, colors, Roulette, clock, money
 
 
 global stage
-global money
 global name
 global roulete_wins
 global coin_wins
@@ -30,7 +29,6 @@ running = True
 # stage home, login, singin, roulete, slot, coinflip, account, about, deposite, test
 stage = "login"
 roulette = None
-money = 0
 name = "abobus"
 roulete_wins = 0
 coin_wins = 0
@@ -46,7 +44,7 @@ def set_stage_roulette():
     global stage, roulette
     stage = "Roulette"
     update_btns(nav_bar_btns)
-    roulette = Roulette(screen)
+    roulette = Roulette(screen,log_user_name_txt.user_text)
 
     
 def set_stage_home():
@@ -85,12 +83,12 @@ def sign_function():
     global stage
     if Database.add_user(signin_user_name_txt.user_text, signin_user_password_txt.user_text,signin_user_sec_password_txt.user_text):
         
-        print("dobavil")
         stage ="login"
     else:
         print("false")
+
 def load_data():
-    global money, name, roulete_wins, coin_wins, slot_wins
+    global money, name, roulete_wins, coin_wins, slot_wins, nav_bar_btns
 
     data = Database.load_data(log_user_name_txt.user_text)
     name = data[0]
@@ -98,10 +96,21 @@ def load_data():
     roulete_wins = data[2]
     coin_wins = data[3]
     slot_wins = data[4]
-    
+    nav_bar_btns = []
+    nav_bar_home_btn = Button(0, 0, 180, 60, "Home", set_stage_home, False, screen, stage)
+    nav_bar_roulette_btn = Button(180, 0, 180, 60, "Roulette", set_stage_roulette, False, screen, stage)
+    nav_bar_slot_btn = Button(360, 0, 180, 60, "Slots", set_stage_slot, False, screen, stage, "Slot")
+    nav_bar_coin_btn = Button(540, 0, 180, 60, "Coin Flip", set_stage_coinflip, False, screen, stage, "Coinflip")
+    nav_bar_about_btn = Button(720, 0, 180, 60, "About", set_stage_about, False, screen, stage)
+
+    nav_bar_btns.append(nav_bar_home_btn)
+    nav_bar_btns.append(nav_bar_roulette_btn)
+    nav_bar_btns.append(nav_bar_slot_btn)
+    nav_bar_btns.append(nav_bar_coin_btn)
+    nav_bar_btns.append(nav_bar_about_btn)
+
     nav_bar_account_btn = Button(1000, 0, 280, 60,f"{name}"+" "+f"{money}"+"$", set_stage_account, False, screen, stage, "Account")
     nav_bar_btns.append(nav_bar_account_btn)
-    
 
 
 #login variables
@@ -184,8 +193,9 @@ def roulettePage():
     #TODO username text field, password text field, button login, button singin                        
     global roulette
     nav_bar()
+    load_data()
     roulette.draw()
-    roulette.ball_animation()
+    #roulette.ball_animation()
 
 
 def slotPage():
@@ -263,17 +273,53 @@ def text_field_events(event):
                 
                 if(stage == "login"):
                     login_function()
+            
+            
+            if text.alt_color == "9" or text.alt_color == "36":
+
+                if event.key == pygame.K_BACKSPACE:
+                    text.user_text = text.user_text[:-1]
+
+                if(len(text.user_text)<text.max_length):
+
+                    if (event.unicode.isnumeric()):
+                        text.user_text += event.unicode
+                    else:
+                        None
+                    continue
+            
+                    
+
             # Check for backspace
             if event.key == pygame.K_BACKSPACE:
                 text.user_text = text.user_text[:-1]
             elif(len(text.user_text)<text.max_length):
                 text.user_text += event.unicode
+            
+
         if text.active:
             text.color = text.color_active
         else:
             text.color = text.color_passive
 
 stage = "login"
+
+def pre_login():
+    global name, roulete_wins, money, slot_wins, coin_wins, stage
+    data = Database.load_data("Egor")
+    name = data[0]
+    money = data[1]
+    roulete_wins = data[2]
+    coin_wins = data[3]
+    slot_wins = data[4]
+    nav_bar_account_btn = Button(1000, 0, 280, 60,f"{name}"+" "+f"{money}"+"$", set_stage_account, False, screen, stage, "Account")
+    nav_bar_btns.append(nav_bar_account_btn)
+    stage = "Home"
+    log_user_name_txt.user_text = "Egor"
+    update_btns(nav_bar_btns)
+#pre_login()
+
+
 
 while running:
     

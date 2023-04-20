@@ -80,3 +80,14 @@ def load_data(name):
         if(user['name'] == name):
            return [user['name'], user['money'], user["roulete_wins"], user["coin_wins"], user["slot_wins"]]
     return []
+
+def update(name,money):    
+    with open('users.json') as json_file:
+        data = json.load(json_file)
+        for user in data:
+            if(user['name'] == name):
+                user["money"] = money
+                break
+
+    with open("users.json", "w") as outfile:
+        outfile.write(json.dumps(data, indent=4))
