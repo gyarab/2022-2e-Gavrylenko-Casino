@@ -1,13 +1,16 @@
-import pygame , math
+import pygame , math, Database, random
 
 colors = {
     'background': '0x222222',
     'buttons': '0x434242',
     'card_bg': '0x22A39F',
     'btn_hover': '0x22A39F',
-    'text': '0xF3EFE0'
+    'text': '0xF3EFE0',
+    'red' : '0x9d0208',
+    'green' : '0x4f772d'
 }
 clock = pygame.time.Clock()
+money = 0
 
 class Button():
     def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False, screen = None, stage = None, hidd_text = None):
@@ -91,6 +94,8 @@ class TextField():
         
         if alt_color == "9":
             self.max_length = 9
+        if alt_color == "36":
+            self.max_length = 2
         
         self.screen = screen
         self.static = static
@@ -151,43 +156,62 @@ class RouletteBall():
     def draw(self):
         pygame.draw.circle( self.screen, colors["text"], (self.x, self.y), self.radius, self.radius)
 
-    #TODO do animations in rocnikovka.py
     
-
+class RouletteBet():
+    def __init__(self,bet,type,number = None):
+        self.type = type
+        self.bet = bet
+        self.number = number
+        self.color = colors["text"]
+        
 
 class Roulette():
 
-    def __init__(self, screen):
+    def __init__(self, screen,username):
         self.numbers = []
         self.position = 0
         self.title = "roulette"
         self.screen = screen
         self.ball = RouletteBall(screen,825,336)
+        self.base_font = pygame.font.Font(None, 32)
+        self.username = username
+
         self.bet_txt = []
         self.text_black_bet = TextField(20,200,150,60, "Your bet..", False, None, screen,False, "9")
         self.text_red_bet = TextField(20, 300, 150,60, "Your bet..", False, None, screen, False,"9")
         self.text_green_bet = TextField(20,400,150,60,"Your bet..", False, None,screen, False, "9")
+        self.text_number_bet = TextField(20,500,150,60,"Your bet..", False, None,screen, False, "9")
         self.text_black = TextField(200, 200, 120,60, "Black", False, None, screen, True, "black")
         self.text_red = TextField(200, 300, 120,60, "Red", False, None, screen, True, "red")
         self.text_green = TextField(200, 400, 120,60, "Green", False, None, screen, True, "green")
-        self.bets = []
-
-        self.roulette_btns = []
-        self.submit_btn = Button(70, 500, 200, 60, "Submit", None, False , screen)
-        self.roulette_btns.append(self.submit_btn)
+        self.text_number = TextField(200, 500, 120,60, "0-36", False, None, screen, False, "36")
         self.bet_txt.append(self.text_black_bet)
         self.bet_txt.append(self.text_red_bet)
         self.bet_txt.append(self.text_green_bet)
         self.bet_txt.append(self.text_black)
         self.bet_txt.append(self.text_red)
         self.bet_txt.append(self.text_green)
+        self.bet_txt.append(self.text_number)
+        self.bet_txt.append(self.text_number_bet)
 
+
+        self.bets = []
+        self.prev_bets = []
+        self.bets_win = []
+        self.roulette_btns = []
+        self.win_num = -1
+
+        self.submit_btn = Button(70, 600, 200, 60, "Submit", self.add_bet, False , screen)
+        self.play_btn = Button(550, 600, 200, 60, "Play", self.play_game, False , screen)
+        self.roulette_btns.append(self.submit_btn)
+        self.roulette_btns.append(self.play_btn)
+        
+        
 
     def draw_circle(self,x,y):
     
         pygame.draw.ellipse(self.screen, "0x000000", pygame.Rect(x,y,400,400), 200)
 
-        base_font = pygame.font.Font(None, 32)
         center_x = x + 200
         center_y = y + 200
         r = 220
@@ -205,29 +229,162 @@ class Roulette():
             new_x = round(r * math.cos(angle * (i - 0.5) ) + center_x - 11)
             new_y = round(r * math.sin(angle * (i - 0.5) ) + center_y - 11)
 
-            text_surface = base_font.render(str(numbers[i]), True, "0xF3EFE0")
+            text_surface = self.base_font.render(str(numbers[i]), True, "0xF3EFE0")
             self.screen.blit(text_surface, (new_x, new_y))
     
 
     def draw(self):
         for txt in self.bet_txt:
             txt.draw()
-        for btns in self.roulette_btns:
-            btns.process()
+        self.submit_btn.process()
+        if (len(self.bets)>0):
+            self.play_btn.process()
+        self.play_btn
         self.draw_circle(450,150)
+        for i in range(0,len(self.bets)):
+            
+            if (self.bets[i].type == "number"):
+                text_surface = self.base_font.render(str(self.bets[i].bet)+" $"+" on number "+str(self.bets[i].number), True, "0xF3EFE0")
+            else:
+                text_surface = self.base_font.render(str(self.bets[i].bet)+" $"+" on "+self.bets[i].type, True, "0xF3EFE0")
+            self.screen.blit(text_surface, (1260-text_surface.get_width(), 220+i*20))
         
+        if len(self.bets) == 0:
+            for i in range(0,len(self.prev_bets)):
+                
+                if (self.prev_bets[i].type == "number"):
+                    text_surface = self.base_font.render(str(self.prev_bets[i].bet)+" $"+" on number "+str(self.prev_bets[i].number), True, self.prev_bets[i].color)
+                else:
+                    text_surface = self.base_font.render(str(self.prev_bets[i].bet)+" $"+" on "+self.prev_bets[i].type, True, self.prev_bets[i].color)
+                self.screen.blit(text_surface, (1260-text_surface.get_width(), 220+i*20))
+        self.ball.draw()
+        
+    def add_bet(self):
+        data = Database.load_data(self.username)
+        money = data[1]
+
+        if(self.text_black_bet.user_text != self.text_black_bet.textholder and money >= int(self.text_black_bet.user_text)):
+            bet = int(self.text_black_bet.user_text)
+            self.bets_win.append(bet*2)
+            self.bets.append(RouletteBet(bet,"black"))
+            money -= bet
+            self.text_black_bet.user_text = self.text_black_bet.textholder 
+        if(self.text_red_bet.user_text != self.text_red_bet.textholder and money >= int(self.text_red_bet.user_text)):
+            bet = int(self.text_red_bet.user_text)
+            self.bets_win.append(bet*2)
+            self.bets.append(RouletteBet(bet,"red"))
+            money -= bet
+            self.text_red_bet.user_text = self.text_red_bet.textholder
+        if(self.text_green_bet.user_text != self.text_green_bet.textholder and money >= int(self.text_green_bet.user_text)):
+            bet = int(self.text_green_bet.user_text)
+            self.bets_win.append(bet*50)
+            self.bets.append(RouletteBet(bet,"green"))
+            money -= bet
+            self.text_green_bet.user_text = self.text_green_bet.textholder
+        if(self.text_number_bet.user_text != self.text_number_bet.textholder and self.text_number.user_text != self.text_number.textholder and money >= int(self.text_number_bet.user_text)):
+            bet = int(self.text_number_bet.user_text)
+            self.bets_win.append(bet*35)
+            self.bets.append(RouletteBet(bet,"number",int(self.text_number.user_text)))
+            money -= bet
+            self.text_number_bet.user_text = self.text_number_bet.textholder
+            self.text_number.user_text = self.text_number.textholder
+    
+        Database.update(self.username,money)
+
+    def play_game(self):
+        self.ball_animation()
+        print("konec")
+        self.bet_process()
+
+
+    def bet_process(self):
+        data = Database.load_data(self.username)
+        money = data[1]
+        numbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]
+        #TODO procces bets (for bet in bets)
+        index = numbers.index(self.win_num)
+
+        for i in range(0,len(self.bets)):
+            if (self.bets[i].number == self.win_num):
+                    money += self.bets_win[i]
+                    self.bets[i].color =colors["green"]
+                    continue
+            if (index == 0):
+                if (self.bets[i].type == "green"):
+                    money += self.bets_win[i]
+                    self.bets[i].color =colors["green"]
+                    continue
+
+            if (index %2 == 0):
+                if (self.bets[i].type == "black"):
+                    money += self.bets_win[i]
+                    self.bets[i].color =colors["green"]
+                    continue
+
+            if (index %2 == 1):
+                if (self.bets[i].type == "red"):
+                    money += self.bets_win[i]
+                    self.bets[i].color =colors["green"]
+                    continue
+            self.bets[i].color =colors["red"]
+            
+            #chcek na number bet
+        #write cod above ↑
+        self.prev_bets =self.bets
+        self.bets = []
+        self.bets_win = []
+        Database.update(self.username,money)
+
+
     def ball_animation(self):
         center_x = 450 + 200
         center_y = 150 + 200
         r = 160
-        for i in range(0,360):
-            angle = math.pi/180
-            new_x = round(r * math.cos(angle * (i - 0.5) ) + center_x - 11)
-            new_y = round(r * math.sin(angle * (i - 0.5) ) + center_y - 11)
-            self.ball.x =new_x
-            self.ball.y =new_y
-            
-            self.draw()
-            self.ball.draw()
-            clock.tick(100)
-            pygame.display.flip()
+        def loop(speed):
+            for i in range(0,360):
+                angle = math.pi/180
+                new_x = round(r * math.cos(angle * (i - 0.5) ) + center_x )
+                new_y = round(r * math.sin(angle * (i - 0.5) ) + center_y )
+                self.ball.x =new_x
+                self.ball.y =new_y
+                
+                
+                self.draw_circle(450,150)
+                self.ball.draw()
+                clock.tick(speed)
+                pygame.display.flip()
+        numbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]
+        self.win_num = random.choice(numbers)
+        
+        def slow(number, speed):
+            stop_angle = (360 * math.pi)/(37*180) * numbers.index(number) 
+            stop_in_degree = round((360)/(37) * numbers.index(number))
+            for i in range(0,360): 
+                angle = math.pi/180
+                new_x = round(r * math.cos(angle * (i - 0.5) ) + center_x )
+                new_y = round(r * math.sin(angle * (i - 0.5) ) + center_y )
+                self.ball.x =new_x
+                self.ball.y =new_y
+                if(angle * (i - 0.5)>=stop_angle):
+                    break
+                self.draw_circle(450,150)
+                self.ball.draw()
+                clock.tick(speed)
+                pygame.display.flip()
+            for i in range(stop_in_degree,stop_in_degree+360 -3):
+                angle = math.pi/180
+                new_x = round(r * math.cos(angle * (i - 0.5) ) + center_x )
+                new_y = round(r * math.sin(angle * (i - 0.5) ) + center_y )
+                self.ball.x =new_x
+                self.ball.y =new_y
+                self.draw_circle(450,150)
+                self.ball.draw()
+                clock.tick((speed-30) * ((stop_in_degree+357-i)/(stop_in_degree+357)) + 30)
+                pygame.display.flip()
+                
+        
+        #animation
+        loop(1000)
+        loop(500)
+        loop(400)
+        slow(self.win_num,300)
