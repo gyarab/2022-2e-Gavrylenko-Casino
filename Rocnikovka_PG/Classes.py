@@ -315,7 +315,7 @@ class Roulette():
                     self.bets[i].color =colors["green"]
                     continue
 
-            if (index %2 == 0):
+            if (index %2 == 0) and (index != 0):
                 if (self.bets[i].type == "black"):
                     money += self.bets_win[i]
                     self.bets[i].color =colors["green"]
@@ -379,7 +379,7 @@ class Roulette():
                 self.ball.y =new_y
                 self.draw_circle(450,150)
                 self.ball.draw()
-                clock.tick((speed-30) * ((stop_in_degree+357-i)/(stop_in_degree+357)) + 30)
+                clock.tick((speed-3) * ((stop_in_degree+357-i)/(stop_in_degree+357)) + 3)
                 pygame.display.flip()
                 
         
