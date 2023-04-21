@@ -7,7 +7,9 @@ colors = {
     'btn_hover': '0x22A39F',
     'text': '0xF3EFE0',
     'red' : '0x9d0208',
-    'green' : '0x4f772d'
+    'green' : '0x4f772d',
+    'black' : '0x000000'
+
 }
 clock = pygame.time.Clock()
 money = 0
@@ -170,7 +172,6 @@ class Roulette():
     def __init__(self, screen,username):
         self.numbers = []
         self.position = 0
-        self.title = "roulette"
         self.screen = screen
         self.ball = RouletteBall(screen,825,336)
         self.base_font = pygame.font.Font(None, 32)
@@ -262,6 +263,9 @@ class Roulette():
     def add_bet(self):
         data = Database.load_data(self.username)
         money = data[1]
+        roulete_wins = data[2]
+        slot_wins = data[3]
+        coin_wins = data[4]
 
         if(self.text_black_bet.user_text != self.text_black_bet.textholder and money >= int(self.text_black_bet.user_text)):
             bet = int(self.text_black_bet.user_text)
@@ -289,7 +293,7 @@ class Roulette():
             self.text_number_bet.user_text = self.text_number_bet.textholder
             self.text_number.user_text = self.text_number.textholder
     
-        Database.update(self.username,money)
+        Database.update(self.username,money,roulete_wins,slot_wins,coin_wins)
 
     def play_game(self):
         self.ball_animation()
@@ -300,6 +304,9 @@ class Roulette():
     def bet_process(self):
         data = Database.load_data(self.username)
         money = data[1]
+        roulete_wins = data[2]
+        slot_wins = data[3]
+        coin_wins = data[4]
         numbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]
         #TODO procces bets (for bet in bets)
         index = numbers.index(self.win_num)
@@ -308,23 +315,27 @@ class Roulette():
             if (self.bets[i].number == self.win_num):
                     money += self.bets_win[i]
                     self.bets[i].color =colors["green"]
+                    roulete_wins+=1
                     continue
             if (index == 0):
                 if (self.bets[i].type == "green"):
                     money += self.bets_win[i]
                     self.bets[i].color =colors["green"]
+                    roulete_wins+=1
                     continue
 
             if (index %2 == 0) and (index != 0):
                 if (self.bets[i].type == "black"):
                     money += self.bets_win[i]
                     self.bets[i].color =colors["green"]
+                    roulete_wins+=1
                     continue
 
             if (index %2 == 1):
                 if (self.bets[i].type == "red"):
                     money += self.bets_win[i]
                     self.bets[i].color =colors["green"]
+                    roulete_wins+=1
                     continue
             self.bets[i].color =colors["red"]
             
@@ -333,7 +344,7 @@ class Roulette():
         self.prev_bets =self.bets
         self.bets = []
         self.bets_win = []
-        Database.update(self.username,money)
+        Database.update(self.username,money,roulete_wins,slot_wins,coin_wins)
 
 
     def ball_animation(self):
@@ -388,3 +399,188 @@ class Roulette():
         loop(500)
         loop(400)
         slow(self.win_num,300)
+
+class Coin():
+    def __init__(self,x,y,screen) -> None:
+        self.x = x
+        self.y = y
+        self.screen =screen
+        self.b = 100
+        self.color = colors["green"]
+    def draw(self):
+        pygame.draw.ellipse(self.screen,self.color, pygame.Rect(self.x,self.y,200,200), 180)
+
+class CoinGame():
+    def __init__(self,screen, username):
+        self.screen = screen
+        self.username = username
+        self.coin = Coin(450,150,screen)
+        self.screen = screen
+        self.base_font = pygame.font.Font(None, 32)
+        self.username = username
+        self.bet = [-1,False]# [100,True]
+        self.btns = []
+        self.bets_win = 0
+        self.bet_color = False
+        self.coin_random = False
+        
+        self.submit_btn = Button(700, 600, 200, 60, "Submit", self.add_bet, False , screen)
+        self.play_btn = Button(550, 400, 200, 60, "Play", self.play_game, False , screen)
+        self.green_btn = Button(70, 600, 200, 60, "Green", self.select_green, False , screen)
+        self.red_btn = Button(450, 600, 200, 60, "Red", self.select_red, False , screen)
+        self.btns.append(self.submit_btn)
+        self.btns.append(self.green_btn)
+        self.btns.append(self.red_btn)
+
+        self.text_number_bet = TextField(20,500,150,60,"Your bet..", False, None,screen, False, "9")
+
+    def draw(self):
+        for btn in self.btns:
+            
+            btn.process()
+        self.text_number_bet.draw()
+        if self.bet[0] != -1:  
+            self.play_btn.process()
+        self.coin.draw()
+
+    def bet_process(self):
+        data = Database.load_data(self.username)
+        money = data[1]
+        roulete_wins = data[2]
+        slot_wins = data[3]
+        coin_wins = data[4]
+        #TODO procces bets (for bet in bets)
+
+        
+        if (self.bet[1] == self.coin_random):
+                money += self.bets_win * 2
+                coin_wins+=1
+        
+           
+            
+        self.bet = [-1,-1]
+        self.bets_win = 0
+        Database.update(self.username,money,roulete_wins,slot_wins,coin_wins)
+
+    def play_game(self):
+        
+        self.coin_random = random.choice([True,False])
+        
+        self.animation()
+        self.bet_process()
+        self.text_number_bet.user_text = self.text_number_bet.textholder
+        self.green_btn.fillColors["normal"] = colors["black"]
+        self.green_btn.fillColors["hoover"] = colors["black"]
+        self.red_btn.fillColors["normal"] = colors["black"]
+        self.red_btn.fillColors["hoover"] = colors["black"]
+
+    def animation(self):
+        print("animation!")
+        
+        def loop(speed):
+            b = 0
+            while(self.coin.b-b>0):
+                b +=1
+                pygame.draw.rect(self.screen,colors["background"],pygame.Rect(self.coin.x,self.coin.y,200,200),200)
+                pygame.draw.ellipse(self.screen, colors["green"], pygame.Rect(self.coin.x,self.coin.y+b,200,200-2*b), 200)
+                pygame.display.flip()
+                clock.tick(speed)
+            
+            b = 100
+            while(b>0):
+                b -=1
+                pygame.draw.rect(self.screen,colors["background"],pygame.Rect(self.coin.x,self.coin.y,200,200),200)
+                pygame.draw.ellipse(self.screen, colors["red"], pygame.Rect(self.coin.x,self.coin.y+b,200,200-2*b), 200)
+                pygame.display.flip()
+                clock.tick(speed)
+            b = 0
+            while(self.coin.b-b>0):
+                b +=1
+                pygame.draw.rect(self.screen,colors["background"],pygame.Rect(self.coin.x,self.coin.y,200,200),200)
+                pygame.draw.ellipse(self.screen, colors["red"], pygame.Rect(self.coin.x,self.coin.y+b,200,200-2*b), 200)
+                pygame.display.flip()
+                clock.tick(speed)
+            
+            b = 100
+            while(b>0):
+                b -=1
+                pygame.draw.rect(self.screen,colors["background"],pygame.Rect(self.coin.x,self.coin.y,200,200),200)
+                pygame.draw.ellipse(self.screen, colors["green"], pygame.Rect(self.coin.x,self.coin.y+b,200,200-2*b), 200)
+                pygame.display.flip()
+                clock.tick(speed)
+        def end():
+            if self.coin_random == False:
+                b = 0
+                while(self.coin.b-b>0):
+                    b +=1
+                    pygame.draw.rect(self.screen,colors["background"],pygame.Rect(self.coin.x,self.coin.y,200,200),200)
+                    pygame.draw.ellipse(self.screen, colors["green"], pygame.Rect(self.coin.x,self.coin.y+b,200,200-2*b), 200)
+                    pygame.display.flip()
+                    clock.tick(300)
+            
+                b = 100
+                while(b>0):
+                    b -=1
+                    pygame.draw.rect(self.screen,colors["background"],pygame.Rect(self.coin.x,self.coin.y,200,200),200)
+                    pygame.draw.ellipse(self.screen, colors["red"], pygame.Rect(self.coin.x,self.coin.y+b,200,200-2*b), 200)
+                    pygame.display.flip()
+                    clock.tick(300)
+                self.coin.color = colors["red"]
+            else:
+                self.coin.color = colors["green"]
+
+        num = random.randint(2,5)
+        for i in range(0,num):
+            loop(300)
+        end()
+        
+            
+
+
+
+
+    def add_bet(self):
+        if(self.bet_color != "black" and self.text_number_bet.user_text != self.text_number_bet.textholder):
+            
+            data = Database.load_data(self.username)
+            money = data[1]
+            roulete_wins = data[2]
+            slot_wins = data[3]
+            coin_wins = data[4]
+            if (money>int(self.text_number_bet.user_text)):
+                
+                self.bets_win = int(self.text_number_bet.user_text)
+                money -= self.bets_win
+            
+
+                self.bet = [int(self.text_number_bet.user_text),self.bet_color] 
+                
+                Database.update(self.username,money,roulete_wins,slot_wins,coin_wins)
+    
+
+
+    def select_green(self):
+        self.bet_color = True
+        self.select_color(True)
+    def select_red(self):
+        self.bet_color = False
+        self.select_color(False)
+        
+
+    def select_color(self,color):
+        if(color):
+            self.green_btn.fillColors["normal"] = colors["green"]
+            self.green_btn.fillColors["hoover"] = colors["green"]
+            self.green_btn.fillColors["pressed"] = colors["green"]
+
+            self.red_btn.fillColors["normal"] = colors["black"]
+            self.red_btn.fillColors["hoover"] = colors["black"]
+        else:
+            self.red_btn.fillColors["normal"] = colors["red"]
+            self.red_btn.fillColors["hoover"] = colors["red"]
+            self.red_btn.fillColors["pressed"] = colors["red"]
+
+
+            self.green_btn.fillColors["normal"] = colors["black"]
+            self.green_btn.fillColors["hoover"] = colors["black"]
+    

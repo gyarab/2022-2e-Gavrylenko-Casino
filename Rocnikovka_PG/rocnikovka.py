@@ -7,7 +7,7 @@
 
 import pygame, math
 import Database
-from Classes import GameCard, Button, TextField, colors, Roulette, clock, money
+from Classes import GameCard, Button, TextField, colors, Roulette, clock, money, CoinGame
 
 
 global stage
@@ -56,9 +56,11 @@ def set_stage_slot():
     stage = "Slot"
     update_btns(nav_bar_btns)
 def set_stage_coinflip():
-    global stage
+    global stage, coin_flip
     stage = "Coinflip"
+    coin_flip = CoinGame(screen,log_user_name_txt.user_text)
     update_btns(nav_bar_btns)
+
 def set_stage_account():
     global stage
     stage = "Account"
@@ -73,6 +75,12 @@ def set_stage_deposite():
 def set_signin_page():
     global stage
     stage = "signin"
+def set_stage_login():
+    global stage
+    stage = "login"
+    log_user_name_txt.user_text = log_user_name_txt.textholder
+    log_user_password_txt.user_text = log_user_password_txt.textholder
+    
 def login_function():
     if Database.authorize(log_user_name_txt.user_text,log_user_password_txt.user_text):
         global stage
@@ -94,8 +102,8 @@ def load_data():
     name = data[0]
     money = data[1]
     roulete_wins = data[2]
-    coin_wins = data[3]
-    slot_wins = data[4]
+    slot_wins = data[3]
+    coin_wins = data[4]
     nav_bar_btns = []
     nav_bar_home_btn = Button(0, 0, 180, 60, "Home", set_stage_home, False, screen, stage)
     nav_bar_roulette_btn = Button(180, 0, 180, 60, "Roulette", set_stage_roulette, False, screen, stage)
@@ -112,9 +120,27 @@ def load_data():
     nav_bar_account_btn = Button(1000, 0, 280, 60,f"{name}"+" "+f"{money}"+"$", set_stage_account, False, screen, stage, "Account")
     nav_bar_btns.append(nav_bar_account_btn)
 
-
+def add_money():
+    global money
+    try:
+        money += int(dep_money_txt.user_text)
+        dep_money_txt.user_text = ""
+        set_stage_account()
+    except:
+        None
+    
+    Database.update(log_user_name_txt.user_text,money,roulete_wins,slot_wins,coin_wins)
+def wisdraw():
+    global money
+    try:
+        money -= int(dep_money_out_txt.user_text)
+        dep_money_out_txt.user_text = ""        
+        Database.update(log_user_name_txt.user_text,money,roulete_wins,slot_wins,coin_wins)
+    except:
+        None
 #login variables
 login_page_btns = []
+
 log_signin_btn = Button(WIDTH/2 - 75, 550, 150, 60, 'Sign In', set_signin_page, False, screen, stage)
 log_login_btn = Button(WIDTH/2 - 125, 450, 250, 60, 'Login', login_function, False, screen, stage)
 login_page_btns.append(log_signin_btn)
@@ -164,7 +190,41 @@ home_cards.append(home_roulette_card)
 home_cards.append(home_slot_card)
 home_cards.append(home_flipcoin_card)
 
+#account page
+acc_deposite_btn = Button(600, 100, 180, 60, "Deposite", set_stage_deposite, False, screen, stage)
+acc_log_out_btn = Button(1000, 300, 180, 60, "Log out", set_stage_login, False, screen, stage)
+acc_btns = []
+acc_btns.append(acc_log_out_btn)
+acc_btns.append(acc_deposite_btn)
+
+#deposite page
+dep_back_btn = Button(0, 0, 180, 60, "Back", set_stage_account, False, screen, stage)
+
+dep_deposite_txt = TextField(280, 200, 150, 60, "Deposite",False, True, screen, True)
+dep_money_txt = TextField(280, 340, 150, 60, 'Value..',False, add_money, screen,False,"9")
+dep_money_btn = Button(265, 440, 180, 60, "Confirm", add_money, False, screen, stage)
+
+dep_withdrow_txt = TextField(850, 200, 150, 60, "Withdrow",False, True, screen, True)
+dep_money_out_txt = TextField(850, 340, 150, 60, 'Value..',False, wisdraw, screen,False,"9")
+dep_money_out_btn = Button(835, 440, 180, 60, "Confirm", wisdraw, False, screen, stage)
+
+
+
+
+dep_txts = []
+dep_txts.append(dep_money_txt)
+dep_txts.append(dep_money_out_txt)
+dep_txts.append(dep_deposite_txt)
+dep_txts.append(dep_withdrow_txt)
+
+
+dep_btns = []
+dep_btns.append(dep_money_btn)
+dep_btns.append(dep_money_out_btn)
+dep_btns.append(dep_back_btn)
+
 def nav_bar():
+    load_data()
     for btn in nav_bar_btns:
         btn.process()
 
@@ -205,10 +265,26 @@ def slotPage():
 def coinflipPage():
     #TODO username text field, password text field, button login, button singin
     nav_bar()
+    coin_flip.draw()
+
 
 def accountPage():
     #TODO username text field, password text field, button login, button singin
     nav_bar()
+    for btn in acc_btns:
+        btn.process()
+    base_font = pygame.font.Font(None, 32)
+    text_surface = base_font.render(str(money)+" $", True, "0xF3EFE0")
+    screen.blit(text_surface, (30,200))
+
+    text_surface = base_font.render(str(roulete_wins)+" Roulette wins", True, "0xF3EFE0")
+    screen.blit(text_surface, (30,250))
+
+    text_surface = base_font.render(str(slot_wins)+" Slot wins", True, "0xF3EFE0")
+    screen.blit(text_surface, (30,300))
+    
+    text_surface = base_font.render(str(coin_wins)+" Coin flip wins", True, "0xF3EFE0")
+    screen.blit(text_surface, (30,350))
 
 def aboutPage():
     #TODO username text field, password text field, button login, button singin
@@ -216,7 +292,11 @@ def aboutPage():
 
 def depositePage():
     #TODO username text field, password text field, button login, button singin
-    print("loginpage")
+    for btn in dep_btns:
+        btn.process()
+    for txt in dep_txts:
+        txt.draw()
+
 
 def page(current_state):
     match current_state:
@@ -242,7 +322,7 @@ def page(current_state):
 
 
 def text_field_events(event):
-    global stage, roulette
+    global stage, roulette, coin_flip
     if (stage =="login"):
         page_txt = login_page_txt
     elif(stage == "signin"):
@@ -250,8 +330,12 @@ def text_field_events(event):
     elif(stage == "Roulette"):
         page_txt = roulette.bet_txt
         roulette.bet_txt[0].draw()
+    elif(stage == "Deposite"):
+        page_txt = dep_txts
+    elif(stage == "Coinflip"):
+        page_txt = [coin_flip.text_number_bet]
     else:
-        page_txt = []
+        page_txt = [] 
 
     for text in page_txt:
         
@@ -302,7 +386,6 @@ def text_field_events(event):
         else:
             text.color = text.color_passive
 
-stage = "login"
 
 def pre_login():
     global name, roulete_wins, money, slot_wins, coin_wins, stage
@@ -310,14 +393,14 @@ def pre_login():
     name = data[0]
     money = data[1]
     roulete_wins = data[2]
-    coin_wins = data[3]
-    slot_wins = data[4]
+    slot_wins = data[3]
+    coin_wins = data[4]
     nav_bar_account_btn = Button(1000, 0, 280, 60,f"{name}"+" "+f"{money}"+"$", set_stage_account, False, screen, stage, "Account")
     nav_bar_btns.append(nav_bar_account_btn)
     stage = "Home"
     log_user_name_txt.user_text = "Egor"
     update_btns(nav_bar_btns)
-#pre_login()
+pre_login()
 
 
 

@@ -5,8 +5,9 @@ def showError(text):
 
     window.title("Error")
 
-    lbl = Label(window, text=text, font=("Arial Bold", 50))
 
+    lbl = Label(window, text=text, font=("Arial Bold", 30),bg = '#222222', fg="#F3EFE0")
+    window.configure(bg='#222222')
     lbl.grid(column=0, row=0)
 
     window.mainloop()
@@ -62,8 +63,8 @@ def add_user(name,password,sec_password):
     "password": password,
     "money": 1000,
     "roulete_wins": 0,
-    "coin_wins": 0,
     "slot_wins": 0,
+    "coin_wins": 0
     }
     data.append(user)
     json_object = json.dumps(data, indent=4)
@@ -81,13 +82,17 @@ def load_data(name):
            return [user['name'], user['money'], user["roulete_wins"], user["coin_wins"], user["slot_wins"]]
     return []
 
-def update(name,money):    
+def update(name,money,roulete_wins,slot_wins,coin_wins):    
     with open('users.json') as json_file:
         data = json.load(json_file)
         for user in data:
             if(user['name'] == name):
                 user["money"] = money
+                user["roulete_wins"] = roulete_wins
+                user["coin_wins"] = coin_wins
+                user["slot_wins"] = slot_wins
                 break
 
     with open("users.json", "w") as outfile:
         outfile.write(json.dumps(data, indent=4))
+
