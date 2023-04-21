@@ -1,6 +1,6 @@
 # 2022-2e-Gavrylenko-Casino
 
-* Kasinový program v pythonu, který simulujet hru flipCoin, ruletu a slot machine.
+* Kasinový program v Pythonu, který simulujet hru flipCoin, ruletu a slot machine.
 
 * Aplikace začíná přihlašovací obrazovkou, kde se uživatel může zaregistrovat nebo použít své přihlašovací údaje k přihlášení do platformy.
 
