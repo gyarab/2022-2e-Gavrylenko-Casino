@@ -5,9 +5,12 @@
 #https://www.pygame.org/docs/ref/draw.html#pygame.draw.circle
 #
 
+#TODO coinflip reдизайн, buttons, slots colors, about page, multiple bets in slots + show
+
+
 import pygame, math
 import Database
-from Classes import GameCard, Button, TextField, colors, Roulette, clock, money, CoinGame
+from Classes import GameCard, Button, TextField, colors, Roulette, clock, money, CoinGame, SlotGame
 
 
 global stage
@@ -28,7 +31,6 @@ running = True
 
 # stage home, login, singin, roulete, slot, coinflip, account, about, deposite, test
 stage = "login"
-roulette = None
 name = "abobus"
 roulete_wins = 0
 coin_wins = 0
@@ -52,8 +54,9 @@ def set_stage_home():
     stage = "Home"
     update_btns(nav_bar_btns)
 def set_stage_slot():
-    global stage
+    global stage, slot
     stage = "Slot"
+    slot = SlotGame(screen,log_user_name_txt.user_text)
     update_btns(nav_bar_btns)
 def set_stage_coinflip():
     global stage, coin_flip
@@ -261,6 +264,8 @@ def roulettePage():
 def slotPage():
     #TODO username text field, password text field, button login, button singin
     nav_bar()
+    load_data()
+    slot.draw()
 
 def coinflipPage():
     #TODO username text field, password text field, button login, button singin
@@ -322,7 +327,7 @@ def page(current_state):
 
 
 def text_field_events(event):
-    global stage, roulette, coin_flip
+    global stage, roulette, coin_flip, slot
     if (stage =="login"):
         page_txt = login_page_txt
     elif(stage == "signin"):
@@ -334,6 +339,8 @@ def text_field_events(event):
         page_txt = dep_txts
     elif(stage == "Coinflip"):
         page_txt = [coin_flip.text_number_bet]
+    elif(stage == "Slot"):
+        page_txt = [slot.text_number_bet]
     else:
         page_txt = [] 
 
@@ -367,7 +374,8 @@ def text_field_events(event):
                 if(len(text.user_text)<text.max_length):
 
                     if (event.unicode.isnumeric()):
-                        text.user_text += event.unicode
+                        if(int(text.user_text+event.unicode)!=0):
+                            text.user_text += event.unicode
                     else:
                         None
                     continue
@@ -415,6 +423,6 @@ while running:
     page(stage)
     pygame.display.flip()
    
-    clock.tick(60)  # limits FPS to 60
+    clock.tick(240)  # limits FPS to 60
 
 pygame.quit()
