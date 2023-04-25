@@ -1,38 +1,11 @@
 [
     {
-        "id": 4,
-        "name": "irena",
-        "password": "123123",
-        "money": 5255,
-        "roulete_wins": 0,
-        "slot_wins": 0,
-        "coin_wins": 0
-    },
-    {
-        "id": 2,
+        "id": 1,
         "name": "Egor",
-        "password": "12345",
-        "money": 1269,
-        "roulete_wins": 1,
-        "slot_wins": 20,
-        "coin_wins": 5
-    },
-    {
-        "id": 3,
-        "name": "Egor2",
-        "password": "12345",
-        "money": 1000,
+        "password": "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5",
+        "money": 85,
         "roulete_wins": 0,
         "slot_wins": 0,
-        "coin_wins": 0
-    },
-    {
-        "id": 4,
-        "name": "Egor 9999$",
-        "password": "12345",
-        "money": 1000,
-        "roulete_wins": 0,
-        "slot_wins": 0,
-        "coin_wins": 0
+        "coin_wins": 1
     }
 ]

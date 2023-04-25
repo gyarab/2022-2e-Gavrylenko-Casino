@@ -1,10 +1,10 @@
 import json
 from tkinter import *
+from hashlib import sha256
+
 def showError(text):
     window = Tk()
-
     window.title("Error")
-
 
     lbl = Label(window, text=text, font=("Arial Bold", 30),bg = '#222222', fg="#F3EFE0")
     window.configure(bg='#222222')
@@ -21,20 +21,16 @@ def authorize(name,password):
         showError("You need to sign up")
         return False
     is_in_base = False
-    is_in_base_name = False
+
     for user in data:
-        
-        if(user['name'] == name and user['password'] == password):
+        if(user['name'] == name and user['password'] == sha256(password.encode('utf-8')).hexdigest()):
             is_in_base = True 
-        if(user['name'] == name):
-            is_in_base_name = True           
+             
     if is_in_base:
         return True
     else:
-
         showError("Your username or password is wrong")
         return False
-
 
 def add_user(name,password,sec_password):
     if password != sec_password:
@@ -57,10 +53,11 @@ def add_user(name,password,sec_password):
         if(user['name'] == name):
             showError("This name is taken")
             return False
+    
     user ={
     "id": len(data)+1,
     "name": name,
-    "password": password,
+    "password": sha256(password.encode('utf-8')).hexdigest(),
     "money": 1000,
     "roulete_wins": 0,
     "slot_wins": 0,
@@ -79,7 +76,7 @@ def load_data(name):
         data = json.load(json_file)
     for user in data:
         if(user['name'] == name):
-           return [user['name'], user['money'], user["roulete_wins"], user["coin_wins"], user["slot_wins"]]
+           return [user['name'], user['money'], user["roulete_wins"],  user["slot_wins"],user["coin_wins"]]
     return []
 
 def update(name,money,roulete_wins,slot_wins,coin_wins):    
