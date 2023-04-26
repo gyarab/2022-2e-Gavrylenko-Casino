@@ -4,6 +4,8 @@
 #https://www.freecodecamp.org/news/create-a-dictionary-in-python-python-dict-methods/
 #https://www.pygame.org/docs/ref/draw.html#pygame.draw.circle
 #https://www.youtube.com/watch?v=WIIf3WaO5x4
+#https://stackoverflow.com
+#https://www.w3schools.com
 
 import pygame, math
 import Database
@@ -26,15 +28,17 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 running = True
 
 stage = "login"
-name = "abobus"
+name = "Masha"
 roulete_wins = 0
 slot_wins = 0
 coin_wins = 0
 
+# Funkce , která aktualizuje tlačítka zobrazená na obrazovce na základě aktuální fáze.
 def update_btns(btns):
     for btn in btns:
         btn.stage = stage
 
+# Každá funkce (do def login_function()) nastavuje globální proměnnou "stage" na určitou hodnotu, která slouží k určení, která část aplikace nebo hry je právě aktivní.
 def set_stage_roulette():
     global stage, roulette
     stage = "Roulette"
@@ -81,7 +85,8 @@ def set_stage_login():
     stage = "login"
     log_user_name_txt.user_text = log_user_name_txt.textholder
     log_user_password_txt.user_text = log_user_password_txt.textholder
-    
+
+# Funkce login_function() kontroluje, zda se přihlašovací údaje uživatele zadané v přihlašovacím formuláři shodují s hodnotami uloženými v databázi, a to voláním metody authorize() třídy s názvem Database.
 def login_function():
     if Database.authorize(log_user_name_txt.user_text,log_user_password_txt.user_text):
         global stage
@@ -89,6 +94,7 @@ def login_function():
         stage ="Home"
         update_btns(nav_bar_btns)
 
+# Funkce sign_function() přidá nového uživatele do databáze voláním metody add_user() třídy Database.
 def sign_function():
     global stage
     if Database.add_user(signin_user_name_txt.user_text, signin_user_password_txt.user_text,signin_user_sec_password_txt.user_text):
@@ -97,12 +103,17 @@ def sign_function():
     else:
         print("false")
 
+# Používá k zobrazení informací o hře.
 def show_info():
     global stage
     if (stage == "Roulette" or stage == "Slot" or stage == "Coinflip"):
         descriptions.show(stage)
         clock.tick(300)
 
+# Tato funkce slouží k načtení dat uživatele z databáze uložené v souboru users.json.
+# Vytváří a aktualizuje také tlačítka navigačního panelu (nav_bar_btns) na základě údajů uživatele a aktuální fáze. Funkce vytvoří šest tlačítek navigačního panelu: 
+# Domů, Ruleta, Slots, Flip Coin, About, Účet a přidá je do nav_bar_btns. 
+# Vytvoří také informační tlačítko, které po kliknutí zobrazí popis hry.
 def load_data():
     global money, name, roulete_wins, slot_wins, coin_wins, nav_bar_btns
 
@@ -131,6 +142,7 @@ def load_data():
     nav_bar_account_btn = Button(1000, 0, 280, 60,f"{name}"+" "+f"{money}"+"$", set_stage_account, False, screen, stage, "Account")
     nav_bar_btns.append(nav_bar_account_btn)
 
+# Tato funkce slouží ke zvýšení množství peněz v herním účtu.
 def add_money():
     global money
     try:
@@ -142,6 +154,7 @@ def add_money():
     
     Database.update(log_user_name_txt.user_text,money,roulete_wins,slot_wins,coin_wins)
 
+#Tato funkce se zřejmě stará o výběr peněz z účtu uživatele.
 def wisdraw():
     global money
     if(dep_money_out_txt.user_text != dep_money_out_txt.textholder and money- int(dep_money_out_txt.user_text)>=0):
@@ -229,6 +242,8 @@ dep_btns.append(dep_money_btn)
 dep_btns.append(dep_money_out_btn)
 dep_btns.append(dep_back_btn)
 
+# Tato funkce se stará o navigační lištu v herním rozhraní. 
+# Nejprve načte data hráče pomocí funkce load_data(). Poté prochází seznam tlačítek v liště a volá metodu process() na každém z nich.
 def nav_bar():
     load_data()
     for btn in nav_bar_btns:
@@ -239,6 +254,7 @@ def nav_bar():
                 continue
         btn.process()
 
+# Tyto funkce (do def page()) definují jednotlivé stránky aplikace kasinové hry. 
 def loginPage():
     for btn in login_page_btns:
         btn.process()
@@ -323,6 +339,7 @@ def depositePage():
     for txt in dep_txts:
         txt.draw()
 
+# Funkce slouží k rozhodnutí, jakou stránku zobrazit v závislosti na aktuálním stavu hry.
 def page(current_state):
     match current_state:
         case "login":
@@ -344,6 +361,7 @@ def page(current_state):
         case "Deposite":
             depositePage()
 
+# Zpracovává události související s textovými poli.
 def text_field_events(event):
     global stage, roulette, coin_flip, slot
     if (stage =="login"):
@@ -397,7 +415,7 @@ def text_field_events(event):
                         None
                     continue
             
-            # Check for backspace
+            # Kontrola backspace
             if event.key == pygame.K_BACKSPACE:
                 text.user_text = text.user_text[:-1]
             elif(len(text.user_text)<text.max_length):
@@ -408,9 +426,10 @@ def text_field_events(event):
         else:
             text.color = text.color_passive
 
+# Funkce slouži k automatickému přihlášování.
 def pre_login():
     global name, roulete_wins, money, slot_wins, coin_wins, stage
-    data = Database.load_data("Egor")
+    data = Database.load_data("")
     name = data[0]
     money = data[1]
     roulete_wins = data[2]
@@ -419,9 +438,9 @@ def pre_login():
     nav_bar_account_btn = Button(1000, 0, 280, 60,f"{name}"+" "+f"{money}"+"$", set_stage_account, False, screen, stage, "Account")
     nav_bar_btns.append(nav_bar_account_btn)
     stage = "Home"
-    log_user_name_txt.user_text = "Egor"
+    log_user_name_txt.user_text = ""
     update_btns(nav_bar_btns)
-pre_login()
+#pre_login()
 
 while running:
     

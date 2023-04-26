@@ -1,6 +1,9 @@
 from tkinter import *
 import pygame 
 clock = pygame.time.Clock()
+
+# Funkce show(game) obsahuje 3 casy : "Roulette", "Slot" a "Coinflip".
+# Každý case znamená hru, kde v pravé dolní části je tlačítko "?". Po kliknuti se zobrazi nove okno s pravidlami her a sazek.
 def show(game):
     window = Tk()
 

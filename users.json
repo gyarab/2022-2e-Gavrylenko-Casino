@@ -1,11 +1,20 @@
 [
     {
         "id": 1,
-        "name": "Egor",
+        "name": "Masha",
         "password": "5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5",
-        "money": 85,
+        "money": 1000,
         "roulete_wins": 0,
         "slot_wins": 0,
-        "coin_wins": 1
+        "coin_wins": 0
+    },
+    {
+        "id": 2,
+        "name": "Masha1",
+        "password": "542e010fc580f5e42ef02e6bb8ad81e98c3f5877a782901da9c33fdc1577a04c",
+        "money": 1000,
+        "roulete_wins": 0,
+        "slot_wins": 0,
+        "coin_wins": 0
     }
 ]

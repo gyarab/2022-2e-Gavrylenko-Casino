@@ -2,6 +2,7 @@ import json
 from tkinter import *
 from hashlib import sha256
 
+# Funkce, která při nastání chyby v novém malém okně vypíše chybu.
 def showError(text):
     window = Tk()
     window.title("Error")
@@ -12,8 +13,9 @@ def showError(text):
 
     window.mainloop()
 
+# Funkce, díky které probíhá autorizace a ověřuje, jestli že hráč je už zaregistrovány nebo-li má špatné přihlašovací údaje.
+# Taky umožňuje šifrování hesel.
 def authorize(name,password):
-    #check for valid name
     try:
         with open('users.json') as json_file:
             data = json.load(json_file)
@@ -32,6 +34,12 @@ def authorize(name,password):
         showError("Your username or password is wrong")
         return False
 
+# Funkce, která umožňuje registraci hráče.
+# Vypíše chybu, jestli že:
+# 1) 1. heslo s 2. nejsou stejná.
+# 2) Heslo je menší než 5 znaků nebo větší než 12.
+# 3) Jméno nového uživatele je stejné s jménem už dřív zaregistrovaného hráče.
+# Jinak přidá nového uživatele do users.json.
 def add_user(name,password,sec_password):
     if password != sec_password:
         showError("Passwords do not match")
@@ -47,13 +55,10 @@ def add_user(name,password,sec_password):
         with open("users.json", "w") as outfile:
             outfile.write(json_object)
         data = []
-    
-    #name check
     for user in data:
         if(user['name'] == name):
             showError("This name is taken")
             return False
-    
     user ={
     "id": len(data)+1,
     "name": name,
@@ -65,12 +70,11 @@ def add_user(name,password,sec_password):
     }
     data.append(user)
     json_object = json.dumps(data, indent=4)
-    
-    # Writing to sample.json
     with open("users.json", "w") as outfile:
         outfile.write(json_object)
     return True
 
+# Tato funkce slouží k načtení dat uživatele z databáze uložené v souboru users.json.
 def load_data(name):
     with open('users.json') as json_file:
         data = json.load(json_file)
@@ -79,6 +83,7 @@ def load_data(name):
            return [user['name'], user['money'], user["roulete_wins"],  user["slot_wins"],user["coin_wins"]]
     return []
 
+# Tato funkce slouží k aktualizaci dat o uživateli v databázi uložené v souboru users.json.
 def update(name,money,roulete_wins,slot_wins,coin_wins):    
     with open('users.json') as json_file:
         data = json.load(json_file)

@@ -24,6 +24,10 @@ colors = {
 clock = pygame.time.Clock()
 money = 0
 
+# Tady ta třída reprezentuje "Tlačítko".
+# Má svoje koordináty, barvu, text a funkce. 
+# Taky dá se použít v různých stage a má svůj skrytý text. 
+# Taky má v sobě funkci process(), která umožňuje tlačítku reagovat na stisknutí.
 class Button():
     def __init__(self, x, y, width, height, buttonText='Button', onclickFunction=None, onePress=False, screen = None, stage = None, hidd_text = None):
         self.x = x
@@ -74,6 +78,17 @@ class Button():
     ])
         self.screen.blit(self.buttonSurface, self.buttonRect)
 
+# Tady ta třída reprezentuje "Textové pole". 
+# Má svoje koordináty, funkce. 
+# Obsahuje "textholder", což umožňuje zobrazovat stály text v poli do kliknutí.
+# Taky dá se použít v různých stage a může mít různý alt_color, který býva :
+# 1) 9,36 : znamená maximální délku texta, který se dá do pole napsat.
+# 2) "green", "black", "red" : barva pole. 
+
+# Obsahuje funkci draw(), která:
+# 1) Když je text heslem, tak zobrazí "*" místo písmen.
+# 2) Když je alt_color 9, tak to znamená sázku, takže bude se tam zobrazovat "$".
+# 3) Kreslí v programu textová pole s určitými koordináty.
 class TextField():
     def __init__(self, x, y, width, height, textholder="default",isPassword=False,function =None, screen = None, static = False, alt_color = None):
         self.x = x
@@ -129,6 +144,10 @@ class TextField():
         pygame.draw.rect(self.screen, self.color , self.textRect)
         self.screen.blit(text_surface, (self.textRect.x+self.textRect.w/2-text_surface.get_width()/2, self.textRect.y + self.textRect.h/2-text_surface.get_height()/2)) 
 
+# Tady ta třída reprezentuje "Hrací kartu".
+# Má svoje koordináty, text a funkce.
+# Obsahuje funkci draw(), která nakreslí obdélník s nazsvem hry v určitých koordinatech.
+# Taky na konci je self.btn.process(), umožňuje kreslení tlačítek v Home page.
 class GameCard():
     def __init__(self, x, y, width, height, title="game",btn_function =None,game_img =None, screen = None):
         self.x = x
@@ -148,6 +167,9 @@ class GameCard():
         self.screen.blit(text_surface, (self.textRect.x +self.width /2-text_surface.get_width()/2, self.textRect.y))
         self.btn.process()
 
+# Tady ta třída reprezentuje "Ruletní míček".
+# Má svoje koordináty, barvu a poloměr.
+# Taky funkce draw(), která kreslí kruh (respektive míček).
 class RouletteBall():
     def __init__(self, screen, x,y):
         self.x = x
@@ -158,13 +180,24 @@ class RouletteBall():
     def draw(self):
         pygame.draw.circle( self.screen, colors["text"], (self.x, self.y), self.radius, self.radius)
  
+# Tato třída reprezentuje "Sázku v ruletě".
+# Při vytváření objektu této třídy se určuje typ sázky (např. na barvu, na sudá/lichá čísla, na konkrétní číslo atd.).
+# Hodnota sázky a případně vybrané číslo (pokud je typ sázky na konkrétní číslo).
+# Sazka také uchovává informaci o barvě, která se používá při vizualizaci sázky na herním plánu.
 class RouletteBet():
     def __init__(self,bet,type,number = None):
         self.type = type
         self.bet = bet
         self.number = number
         self.color = colors["text"]
-        
+
+# Tady ta třída reprezentuje "Ruletu".
+# Obsahuje metodu s názvem draw_circle. 
+# Metoda přebírá dva parametry, x a y, které určují souřadnice levého horního rohu obdélníku, do něhož bude nakreslena elipsa. 
+# Elipsa se vykreslí pomocí funkce pygame.draw.ellipse, která jako argumenty přijímá obrazovku, na kterou se má kreslit, barvu elipsy, obdélník definující velikost a polohu elipsy a nepovinný parametr šířky, který je ve výchozím nastavení roven nule. 
+# Obsahuje funkci ball_animation(), která animuje pohyb kuličky v ruletě. 
+# Poté náhodně vybere číslo ze seznamu čísel na kole a uloží je do atributu self.win_num. 
+# Poté se zavolá funkce slow, která pomalu roztočí kolo, dokud se kulička nezastaví na náhodně vybraném čísle.
 class Roulette():
     def __init__(self, screen,username):
         self.numbers = []
@@ -378,6 +411,8 @@ class Roulette():
         loop(400)
         slow(self.win_num,300)
 
+# Tady ta třída reprezentuje "Coin".
+# Obsahuje metody a atributy, které jsou používány pro kreslení mince.
 class Coin():
     def __init__(self,x,y,screen) -> None:
         self.x = x
@@ -390,6 +425,11 @@ class Coin():
         pygame.draw.ellipse(self.screen,self.color_bg, pygame.Rect(self.x-5,self.y-5,410,410), 180)
         pygame.draw.ellipse(self.screen,self.color, pygame.Rect(self.x,self.y,400,400), 250)
 
+# Tady ta třída reprezentuje "Coin flip game".
+# V konstruktoru třídy jsou inicializovány základní parametry mince, jako jsou její souřadnice na obrazovce, barvy atd. 
+# Metoda draw se pak stará o vykreslení mince na obrazovku.
+# Funkce obsahuje dvě vnitřní funkce, loop() a end(), které slouží k definování chování animace mince v různých fázích.
+# Počet iterací smyčkové funkce je při každém volání animace náhodně generován.
 class CoinGame():
     def __init__(self,screen, username):
         self.screen = screen
@@ -517,11 +557,6 @@ class CoinGame():
             loop(500)
         end(500)
         
-            
-
-
-
-
     def add_bet(self):
         if(self.bet_color != "black" and self.text_number_bet.user_text != self.text_number_bet.textholder):
             
@@ -540,8 +575,6 @@ class CoinGame():
                 
                 Database.update(self.username,money,roulete_wins,slot_wins,coin_wins)
     
-
-
     def select_green(self):
         self.bet_color = True
         self.select_color(True)
@@ -549,7 +582,6 @@ class CoinGame():
         self.bet_color = False
         self.select_color(False)
         
-
     def select_color(self,color):
         if(color):
             self.green_btn.fillColors["normal"] = colors["green"]
@@ -567,6 +599,13 @@ class CoinGame():
             self.green_btn.fillColors["normal"] = colors["black"]
             self.green_btn.fillColors["hoover"] = colors["black"]
 
+# Tady ta třída reprezentuje "Slot game".
+# Obsahuje metodu draw, zřejmě nejprve iteruje seznam objektů tlačítek a volá jejich metodu "process".
+# Poté vykreslí textový objekt související s počtem provedených sázek. Pokud byla provedena sázka, zavolá metodu "process" objektu tlačítka play.
+# Velikost a pozice každého obdélníku je také určena pomocí metody "Rect" z modulu pygame.
+# Funkce animation() je zodpovědná za animaci slotu.
+# Animace se vytváří generováním nových náhodných čísel a překreslováním slotů po dobu 60 iterací se zpožděním určeným parametrem speed.
+# Používá také metodu clock.tick(speed) k řízení rychlosti animace.
 class SlotGame():
     def __init__(self,screen,username) -> None:
         self.screen = screen
