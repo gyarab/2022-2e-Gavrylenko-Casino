@@ -453,6 +453,6 @@ while running:
     page(stage)
     pygame.display.flip()
    
-    clock.tick(240)
+    clock.tick(15)
 
 pygame.quit()
